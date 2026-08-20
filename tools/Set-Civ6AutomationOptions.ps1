@@ -15,6 +15,9 @@ param(
     [int]$TunerEnabled = 1,
 
     [ValidateSet(0, 1)]
+    [int]$PlayIntroVideo = 0,
+
+    [ValidateSet(0, 1)]
     [int]$AutoEndTurn = 0
 )
 
@@ -95,6 +98,7 @@ $results = @(
             FullScreen   = $FullScreen
             RenderWidth  = $RenderWidth
             RenderHeight = $RenderHeight
+            PlayIntroVideo = $PlayIntroVideo
         }) `
         -BackupStamp $stamp
     Update-CivOptionFile `

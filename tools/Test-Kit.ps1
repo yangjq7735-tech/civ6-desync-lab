@@ -45,6 +45,7 @@ try {
         'RenderHeight 2160'
         'FullScreen 1'
         'EnableTuner 0'
+        'PlayIntroVideo 1'
     ) | Set-Content -LiteralPath (Join-Path $fakeCivRoot 'AppOptions.txt') -Encoding UTF8
     'AutoEndTurn 1' | Set-Content -LiteralPath (Join-Path $fakeCivRoot 'UserOptions.txt') -Encoding UTF8
 
@@ -58,7 +59,7 @@ try {
     & $optionsScript -CivRoot $fakeCivRoot -RenderWidth 1600 -RenderHeight 900 -WarningAction SilentlyContinue
     $configuredAppOptions = Get-Content -LiteralPath (Join-Path $fakeCivRoot 'AppOptions.txt') -Raw
     $configuredUserOptions = Get-Content -LiteralPath (Join-Path $fakeCivRoot 'UserOptions.txt') -Raw
-    foreach ($expectedOption in @('RenderWidth 1600', 'RenderHeight 900', 'FullScreen 0', 'EnableTuner 1')) {
+    foreach ($expectedOption in @('RenderWidth 1600', 'RenderHeight 900', 'FullScreen 0', 'EnableTuner 1', 'PlayIntroVideo 0')) {
         if ($configuredAppOptions -notmatch ('(?m)^' + [regex]::Escape($expectedOption) + '\r?$')) {
             throw "Automation options test did not set '$expectedOption'."
         }
