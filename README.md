@@ -21,11 +21,13 @@ The first phase is deliberately conservative: establish a clean vanilla baseline
 - `tools/Set-Civ6AutomationOptions.ps1` — safely backs up and configures the Civ VI Tuner, window size, and turn behavior.
 - `tools/Capture-Civ6Snapshot.ps1` — copies the current Civ VI logs, including files that the running game has open, and generates SHA-256 manifests.
 - `tools/Compare-Civ6Snapshots.ps1` — compares paired manifests and isolates explicit state/desync marker lines when present.
+- `tools/Find-Civ6ModSyncRisks.ps1` — statically audits installed mod gameplay scripts for client-local serialized-state writes.
 - `tools/Test-Kit.ps1` — parses every included PowerShell file and runs the comparator against synthetic paired snapshots.
 - `ACTION-SCRIPT.md` — the fixed baseline procedure and escalation ladder.
 - `experiments/TEMPLATE.md` — copy this for every experiment.
 - `HANDOFF.md` — concise engineering state for future Codex/ChatGPT work.
 - `docs/WORKER-PC-BOOTSTRAP.md` — the repeatable PC B/PC C worker setup and readiness procedure.
+- `docs/STATIC-ANALYSIS.md` — Civ VI's reconstructed resync path and the Quick Deals multiplayer state-divergence finding.
 
 The diagnostic and comparison scripts do not edit Civ VI, enable FireTuner, inject code, or delete anything. The explicitly named worker bootstrap scripts install their documented prerequisites and configure SSH when the operator runs them.
 

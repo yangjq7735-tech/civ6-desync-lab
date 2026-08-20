@@ -2,15 +2,15 @@
 
 ## Current objective
 
-Produce a repeatable two-PC reproduction of Civilization VI's global multiplayer reload/desync behavior, then isolate the smallest mod/action combination that triggers it.
+Confirm whether Quick Deals causes the recurring Civilization VI multiplayer reload/desync, then isolate and fix any remaining trigger.
 
 ## Current phase
 
-Phase 0: establish a clean Windows/LAN baseline and prove paired log capture.
+Static-analysis lead found; next phase is a clean Quick Deals A/B validation using the normal Internet multiplayer path.
 
 ## Working hypothesis
 
-The all-player loading screen is Civ VI resynchronizing after simulations diverge. A mod, mod interaction, or content mismatch becomes the leading hypothesis if a fixed action reproduces the event on the same LAN.
+Quick Deals is the leading hypothesis. Its UI calls an `AddGameplayScripts` cache bridge on every game-view load. That bridge chooses `Players[Game.GetLocalPlayer()]` and writes local deal-cache tables through `Player:SetProperty`, so different clients can mutate different serialized simulation objects. Civ VI's native diagnostic strings show that mismatched AutoArchive hashes trigger delta/full snapshots and the visible resync load.
 
 ## What exists
 
@@ -18,26 +18,26 @@ The all-player loading screen is Civ VI resynchronizing after simulations diverg
 - Read-only PowerShell preflight, snapshot, and comparison tools.
 - An experiment-record template.
 - Marker-aware comparison support for future `CIV6_SYNC_PROBE` instrumentation.
+- A static mod synchronization-risk scanner (`tools/Find-Civ6ModSyncRisks.ps1`).
+- A code-level report (`docs/STATIC-ANALYSIS.md`) documenting Civ VI's resync pipeline and the Quick Deals defect.
+- A scan of all 20 currently installed Workshop manifests: Quick Deals is the sole critical finding; Detailed Wonder Reminder is the sole lower-priority review item.
 
 ## Important limitation
 
-Raw Civ VI logs are client-specific. Different file hashes do not prove simulation divergence. The first instrumented mod must serialize selected gameplay state canonically and print stable markers on every client.
+The defect is proven, but historical causation is not. Existing paired captures contain no genuine `AutoArchive out of sync` marker. The observed access violations occurred with instrumentation attached and must not be presented as Quick Deals evidence.
 
 ## Next actions
 
-1. Copy the kit to both PCs.
-2. Run preflight and resolve environment mismatches.
-3. Complete `V000` twice with no mods.
-4. Compare paired captures and confirm the required logs are retained.
-5. Add AI, rotate host, and then bisect the mod set.
-6. Once a minimal failing action exists, implement a state-probe mod around that subsystem.
-7. Only after the probe is proven, implement a deliberately divergent diagnostic mod.
+1. Disable Quick Deals on both PCs while holding the save, host, network mode, DLC, other mods, and action sequence fixed.
+2. Run through the normal Internet multiplayer path across the usual failure interval twice.
+3. Re-enable only Quick Deals and repeat from the same save/checkpoint.
+4. Capture paired logs immediately if a reload occurs; do not attach FireTuner.
+5. If Quick Deals is causal, fix it upstream or replace its synchronized property cache with UI-local Lua tables. Do not patch the Steam Workshop directory in place.
+6. If it is not causal, repeat the same A/B process with Detailed Wonder Reminder, then bisect the remaining mod set.
 
 ## Questions for the first session
 
-- Do both PCs use Steam, Epic, or a mix?
-- Does `V000` pass twice?
-- Which logs are populated during multiplayer?
-- Is the reload tied to a repeatable turn/action?
-- Does the failure follow the host when rotated?
-- What is the smallest enabled mod subset that fails?
+- Does the problematic save run cleanly twice with Quick Deals disabled?
+- Does the reload return after Quick Deals is re-enabled?
+- What exact action and turn immediately precede the first reload?
+- Does a clean capture name the mismatched AutoArchive?

@@ -100,6 +100,33 @@ try {
 
     Write-Host 'PASS: Windows PowerShell script-relative default output paths.'
 
+    $fakeWorkshopRoot = Join-Path $testRoot 'fake-workshop\12345'
+    New-Item -ItemType Directory -Path (Join-Path $fakeWorkshopRoot 'gameplay') -Force | Out-Null
+    @'
+<Mod id="synthetic-risk" version="1">
+  <Properties><Name>Synthetic Risk</Name></Properties>
+  <InGameActions>
+    <AddGameplayScripts id="risk"><File>gameplay/risk.lua</File></AddGameplayScripts>
+  </InGameActions>
+</Mod>
+'@ | Set-Content -LiteralPath (Join-Path $fakeWorkshopRoot 'Synthetic.modinfo') -Encoding UTF8
+    @'
+local player = Players[Game.GetLocalPlayer()]
+player:SetProperty("LOCAL_UI_CACHE", {})
+'@ | Set-Content -LiteralPath (Join-Path $fakeWorkshopRoot 'gameplay\risk.lua') -Encoding UTF8
+
+    $auditScript = Join-Path $toolsRoot 'Find-Civ6ModSyncRisks.ps1'
+    $auditReport = Join-Path $testRoot 'mod-audit.json'
+    & $auditScript -WorkshopRoot (Split-Path -Parent $fakeWorkshopRoot) -ReportPath $auditReport | Out-Null
+    $auditResult = Get-Content -LiteralPath $auditReport -Raw | ConvertFrom-Json
+    if ($auditResult.summary.critical -ne 1) {
+        throw "Expected one critical synthetic mod finding; found $($auditResult.summary.critical)."
+    }
+    if ($auditResult.findings[0].modName -ne 'Synthetic Risk') {
+        throw 'Synthetic mod audit did not preserve the manifest mod name.'
+    }
+    Write-Host 'PASS: static mod synchronization-risk audit.'
+
     $snapshotA = Join-Path $testRoot 'snapshot-a'
     $snapshotB = Join-Path $testRoot 'snapshot-b'
     $reportPath = Join-Path $testRoot 'comparison.json'
