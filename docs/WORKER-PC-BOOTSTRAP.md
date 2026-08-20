@@ -108,6 +108,8 @@ FullScreen 0
 RenderWidth 1600
 RenderHeight 900
 PlayIntroVideo 0
+AcceptedUnknownDevice 1
+AcceptedOutdatedDriver 1
 ```
 
 `%LOCALAPPDATA%\Firaxis Games\Sid Meier's Civilization VI\UserOptions.txt`
@@ -120,7 +122,7 @@ HasChosenTutorialLevel 1
 
 `EnableTuner 1` disables Steam achievements while it remains enabled. Restore it before the strict vanilla baseline with `Set-Civ6AutomationOptions.ps1 -TunerEnabled 0`.
 
-Windowed 1600×900 is preferred for reliable OCR loading without monopolizing the worker's desktop. Disabling the intro video prevents the lifecycle loader from timing out while it waits for the main menu. Disabling tutorials prevents first-run Advisor dialogs from blocking a turn transition while the MCP is active. The game may stay behind other windows after a match is loaded; avoid minimizing it when OCR or screenshots are required.
+Windowed 1600×900 is preferred for reliable OCR loading without monopolizing the worker's desktop. Disabling the intro video prevents the lifecycle loader from timing out while it waits for the main menu. The two accepted-device flags suppress first-run graphics capability and outdated-driver dialogs; those dialogs appear before Civ creates its Lua states, so neither the Tuner nor the MCP popup tool can dismiss them. Disabling tutorials prevents first-run Advisor dialogs from blocking a turn transition while the MCP is active. The game may stay behind other windows after a match is loaded; avoid minimizing it when OCR or screenshots are required.
 
 ### Register controller-triggered GUI tasks
 

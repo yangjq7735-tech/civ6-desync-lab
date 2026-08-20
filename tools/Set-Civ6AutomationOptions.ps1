@@ -18,6 +18,12 @@ param(
     [int]$PlayIntroVideo = 0,
 
     [ValidateSet(0, 1)]
+    [int]$AcceptedUnknownDevice = 1,
+
+    [ValidateSet(0, 1)]
+    [int]$AcceptedOutdatedDriver = 1,
+
+    [ValidateSet(0, 1)]
     [int]$AutoEndTurn = 0,
 
     [ValidateRange(-1, 2)]
@@ -105,6 +111,8 @@ $results = @(
             RenderWidth  = $RenderWidth
             RenderHeight = $RenderHeight
             PlayIntroVideo = $PlayIntroVideo
+            AcceptedUnknownDevice = $AcceptedUnknownDevice
+            AcceptedOutdatedDriver = $AcceptedOutdatedDriver
         }) `
         -BackupStamp $stamp
     Update-CivOptionFile `
