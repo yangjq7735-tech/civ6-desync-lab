@@ -32,6 +32,38 @@ $testLeaf = 'civ6-desync-kit-test-{0}' -f ([guid]::NewGuid().ToString('N'))
 $testRoot = Join-Path $temporaryBase $testLeaf
 
 try {
+    # Exercise script-relative defaults from copied scripts so the test catches
+    # Windows PowerShell 5.1 parameter-binding regressions without leaving
+    # generated diagnostics in the repository.
+    $integrationTools = Join-Path $testRoot 'tools'
+    $fakeCivRoot = Join-Path $testRoot 'fake-civ-root'
+    New-Item -ItemType Directory -Path $integrationTools -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $fakeCivRoot 'Logs') -Force | Out-Null
+    'Synthetic Civ VI log' | Set-Content -LiteralPath (Join-Path $fakeCivRoot 'Logs\Lua.log') -Encoding UTF8
+    'Synthetic options' | Set-Content -LiteralPath (Join-Path $fakeCivRoot 'AppOptions.txt') -Encoding UTF8
+
+    $preflightScript = Join-Path $integrationTools 'Test-Civ6Environment.ps1'
+    $captureScript = Join-Path $integrationTools 'Capture-Civ6Snapshot.ps1'
+    Copy-Item -LiteralPath (Join-Path $toolsRoot 'Test-Civ6Environment.ps1') -Destination $preflightScript
+    Copy-Item -LiteralPath (Join-Path $toolsRoot 'Capture-Civ6Snapshot.ps1') -Destination $captureScript
+
+    & $preflightScript -Pc A -CivRoot $fakeCivRoot
+    $preflightFiles = @(Get-ChildItem -LiteralPath (Join-Path $testRoot 'preflight') -Filter '*.json' -File)
+    if ($preflightFiles.Count -ne 1) {
+        throw "Expected one default-path preflight report; found $($preflightFiles.Count)."
+    }
+
+    & $captureScript -Pc A -RunId TESTDEFAULT -Checkpoint smoke -CivRoot $fakeCivRoot
+    $captureManifests = @(
+        Get-ChildItem -LiteralPath (Join-Path $testRoot 'captures\TESTDEFAULT') `
+            -Filter 'manifest.json' -File -Recurse
+    )
+    if ($captureManifests.Count -ne 1) {
+        throw "Expected one default-path capture manifest; found $($captureManifests.Count)."
+    }
+
+    Write-Host 'PASS: Windows PowerShell script-relative default output paths.'
+
     $snapshotA = Join-Path $testRoot 'snapshot-a'
     $snapshotB = Join-Path $testRoot 'snapshot-b'
     $reportPath = Join-Path $testRoot 'comparison.json'

@@ -6,11 +6,18 @@ param(
 
     [string]$CivRoot = (Join-Path $env:LOCALAPPDATA "Firaxis Games\Sid Meier's Civilization VI"),
 
-    [string]$OutputRoot = (Join-Path $PSScriptRoot '..\preflight')
+    [string]$OutputRoot = ''
 )
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version 2.0
+
+# Windows PowerShell 5.1 does not reliably populate $PSScriptRoot while
+# parameter default expressions are being evaluated. Resolve script-relative
+# defaults after parameter binding so direct `-File` launches work there too.
+if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
+    $OutputRoot = Join-Path $PSScriptRoot '..\preflight'
+}
 
 function Get-OptionalFileHash {
     param([Parameter(Mandatory = $true)][string]$Path)
