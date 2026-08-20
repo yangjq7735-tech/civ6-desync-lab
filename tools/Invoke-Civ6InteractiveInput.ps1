@@ -43,7 +43,13 @@ public static class Civ6InteractiveInput
     [DllImport("user32.dll")] static extern bool EnumWindows(EnumWindowsProc callback, IntPtr lParam);
     [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
     [DllImport("user32.dll")] static extern bool IsWindowVisible(IntPtr hWnd);
+    [DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
+    [DllImport("kernel32.dll")] static extern uint GetCurrentThreadId();
+    [DllImport("user32.dll")] static extern bool AttachThreadInput(uint source, uint target, bool attach);
     [DllImport("user32.dll")] static extern bool SetForegroundWindow(IntPtr hWnd);
+    [DllImport("user32.dll")] static extern bool BringWindowToTop(IntPtr hWnd);
+    [DllImport("user32.dll")] static extern IntPtr SetActiveWindow(IntPtr hWnd);
+    [DllImport("user32.dll")] static extern IntPtr SetFocus(IntPtr hWnd);
     [DllImport("user32.dll")] static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
     [DllImport("user32.dll")] static extern bool SetCursorPos(int x, int y);
     [DllImport("user32.dll", SetLastError=true)] static extern uint SendInput(uint count, INPUT[] inputs, int size);
@@ -68,8 +74,17 @@ public static class Civ6InteractiveInput
         IntPtr hWnd = FindWindow(processId);
         if (hWnd == IntPtr.Zero) return 0;
 
+        uint ignored;
+        uint currentThread = GetCurrentThreadId();
+        uint targetThread = GetWindowThreadProcessId(hWnd, out ignored);
+        uint foregroundThread = GetWindowThreadProcessId(GetForegroundWindow(), out ignored);
+        AttachThreadInput(currentThread, foregroundThread, true);
+        AttachThreadInput(currentThread, targetThread, true);
         ShowWindow(hWnd, 9);
+        BringWindowToTop(hWnd);
         SetForegroundWindow(hWnd);
+        SetActiveWindow(hWnd);
+        SetFocus(hWnd);
         SetCursorPos(x, y);
 
         INPUT[] mouse = new INPUT[2];
@@ -84,6 +99,8 @@ public static class Civ6InteractiveInput
             keys[1].type = 1; keys[1].U.ki.wVk = 0x0D; keys[1].U.ki.dwFlags = 0x0002;
             sent += SendInput(2, keys, Marshal.SizeOf(typeof(INPUT)));
         }
+        AttachThreadInput(currentThread, targetThread, false);
+        AttachThreadInput(currentThread, foregroundThread, false);
         return sent;
     }
 }
