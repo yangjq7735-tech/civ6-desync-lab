@@ -131,17 +131,22 @@ if ($SkipFocus) {
     $sent = [Civ6InteractiveInput]::SendAt($X, $Y, $TabCount, $Enter.IsPresent)
 } else {
     $candidates = @(Get-Process -Name $ProcessName -ErrorAction SilentlyContinue)
-    $process = $candidates | Where-Object MainWindowHandle -ne 0 | Select-Object -First 1
-    if (-not $process) {
-        $process = $candidates | Select-Object -First 1
-    }
-    if (-not $process) {
+    if (-not $candidates) {
         throw "No matching process is running: $($ProcessName -join ', ')"
     }
-    $sent = [Civ6InteractiveInput]::ClickAndEnter([uint32]$process.Id, $X, $Y, $TabCount, $Enter.IsPresent)
+    $sent = 0
+    foreach ($candidate in ($candidates | Sort-Object StartTime -Descending)) {
+        $candidateSent = [Civ6InteractiveInput]::ClickAndEnter(
+            [uint32]$candidate.Id, $X, $Y, $TabCount, $Enter.IsPresent)
+        if ($candidateSent -gt 0) {
+            $process = $candidate
+            $sent = $candidateSent
+            break
+        }
+    }
 }
 if ($sent -eq 0) {
-    throw 'No input events were accepted by Windows.'
+    throw 'No visible matching window accepted input events.'
 }
 
 [ordered]@{
