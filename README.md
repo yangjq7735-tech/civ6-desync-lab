@@ -15,14 +15,17 @@ The first phase is deliberately conservative: establish a clean vanilla baseline
 
 - `tools/Test-Civ6Environment.ps1` — checks Civ VI's diagnostic folder and writes a non-sensitive preflight report.
 - `tools/Test-Civ6Remote.ps1` — verifies PC B's advertised SSH host fingerprint before testing key authentication.
+- `tools/Enable-Civ6RemoteSsh.ps1` — performs the idempotent Windows OpenSSH worker bootstrap.
+- `tools/Initialize-Civ6WorkerRuntime.ps1` — installs Git/`uv`, creates a separate upstream MCP runtime, and validates it.
 - `tools/Capture-Civ6Snapshot.ps1` — copies the current Civ VI logs, including files that the running game has open, and generates SHA-256 manifests.
 - `tools/Compare-Civ6Snapshots.ps1` — compares paired manifests and isolates explicit state/desync marker lines when present.
 - `tools/Test-Kit.ps1` — parses every included PowerShell file and runs the comparator against synthetic paired snapshots.
 - `ACTION-SCRIPT.md` — the fixed baseline procedure and escalation ladder.
 - `experiments/TEMPLATE.md` — copy this for every experiment.
 - `HANDOFF.md` — concise engineering state for future Codex/ChatGPT work.
+- `docs/WORKER-PC-BOOTSTRAP.md` — the repeatable PC B/PC C worker setup and readiness procedure.
 
-The scripts do not edit Civ VI, enable FireTuner, inject code, or delete anything.
+The diagnostic and comparison scripts do not edit Civ VI, enable FireTuner, inject code, or delete anything. The explicitly named worker bootstrap scripts install their documented prerequisites and configure SSH when the operator runs them.
 
 ## Assumptions
 
