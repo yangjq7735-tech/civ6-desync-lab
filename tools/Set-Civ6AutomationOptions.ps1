@@ -18,7 +18,13 @@ param(
     [int]$PlayIntroVideo = 0,
 
     [ValidateSet(0, 1)]
-    [int]$AutoEndTurn = 0
+    [int]$AutoEndTurn = 0,
+
+    [ValidateRange(-1, 2)]
+    [int]$TutorialLevel = -1,
+
+    [ValidateSet(0, 1)]
+    [int]$HasChosenTutorialLevel = 1
 )
 
 $ErrorActionPreference = 'Stop'
@@ -104,7 +110,9 @@ $results = @(
     Update-CivOptionFile `
         -Path $userOptionsPath `
         -Updates ([ordered]@{
-            AutoEndTurn = $AutoEndTurn
+            AutoEndTurn           = $AutoEndTurn
+            TutorialLevel         = $TutorialLevel
+            HasChosenTutorialLevel = $HasChosenTutorialLevel
         }) `
         -BackupStamp $stamp
 )

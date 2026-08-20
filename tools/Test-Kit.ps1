@@ -47,7 +47,11 @@ try {
         'EnableTuner 0'
         'PlayIntroVideo 1'
     ) | Set-Content -LiteralPath (Join-Path $fakeCivRoot 'AppOptions.txt') -Encoding UTF8
-    'AutoEndTurn 1' | Set-Content -LiteralPath (Join-Path $fakeCivRoot 'UserOptions.txt') -Encoding UTF8
+    @(
+        'AutoEndTurn 1'
+        'TutorialLevel 1'
+        'HasChosenTutorialLevel 0'
+    ) | Set-Content -LiteralPath (Join-Path $fakeCivRoot 'UserOptions.txt') -Encoding UTF8
 
     $preflightScript = Join-Path $integrationTools 'Test-Civ6Environment.ps1'
     $captureScript = Join-Path $integrationTools 'Capture-Civ6Snapshot.ps1'
@@ -66,6 +70,12 @@ try {
     }
     if ($configuredUserOptions -notmatch '(?m)^AutoEndTurn 0\r?$') {
         throw 'Automation options test did not disable AutoEndTurn.'
+    }
+    if ($configuredUserOptions -notmatch '(?m)^TutorialLevel -1\r?$') {
+        throw 'Automation options test did not disable tutorial advisor prompts.'
+    }
+    if ($configuredUserOptions -notmatch '(?m)^HasChosenTutorialLevel 1\r?$') {
+        throw 'Automation options test did not mark the tutorial choice as complete.'
     }
     $optionBackups = @(Get-ChildItem -LiteralPath $fakeCivRoot -Filter '*.bak' -File)
     if ($optionBackups.Count -ne 2) {
