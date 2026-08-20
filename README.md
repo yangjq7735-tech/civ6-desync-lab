@@ -150,6 +150,7 @@ One failure is a lead. Two failures at the same checkpoint with the same setup a
 ## Privacy and safety
 
 - Captures remain local unless you copy or upload them.
+- Generated `captures`, `preflight`, and `reports` directories are ignored by Git so diagnostic data is not published accidentally.
 - `AppOptions.txt` is excluded from snapshots by default. Use `-IncludeAppOptions` only intentionally and inspect it before sharing.
 - `-ExtraPath` can copy saves or supporting files; inspect those before sharing too.
 - The tools never delete, edit, or truncate Civ VI files.

@@ -1,0 +1,13 @@
+# Generated diagnostic data may contain local paths or game/session details.
+captures/
+preflight/
+reports/
+
+# Large or shareable artifacts should be attached deliberately, not committed.
+*.zip
+*.Civ6Save
+*.Civ6Map
+
+# Operating-system metadata.
+.DS_Store
+Thumbs.db
