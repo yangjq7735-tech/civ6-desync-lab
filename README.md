@@ -16,6 +16,7 @@ The first phase is deliberately conservative: establish a clean vanilla baseline
 - `tools/Test-Civ6Environment.ps1` — checks Civ VI's diagnostic folder and writes a non-sensitive preflight report.
 - `tools/Test-Civ6Remote.ps1` — verifies PC B's advertised SSH host fingerprint before testing key authentication.
 - `tools/Enable-Civ6RemoteSsh.ps1` — performs the idempotent Windows OpenSSH worker bootstrap.
+- `tools/Enable-Civ6WorkerGuiTasks.ps1` — registers interactive launch and desktop-capture tasks so the controller can operate a logged-in worker over SSH.
 - `tools/Initialize-Civ6WorkerRuntime.ps1` — installs Git/`uv`, creates a separate upstream MCP runtime, and validates it.
 - `tools/Set-Civ6AutomationOptions.ps1` — safely backs up and configures the Civ VI Tuner, window size, and turn behavior.
 - `tools/Capture-Civ6Snapshot.ps1` — copies the current Civ VI logs, including files that the running game has open, and generates SHA-256 manifests.

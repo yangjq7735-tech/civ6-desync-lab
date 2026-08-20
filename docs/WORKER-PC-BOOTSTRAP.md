@@ -122,6 +122,42 @@ HasChosenTutorialLevel 1
 
 Windowed 1600×900 is preferred for reliable OCR loading without monopolizing the worker's desktop. Disabling the intro video prevents the lifecycle loader from timing out while it waits for the main menu. Disabling tutorials prevents first-run Advisor dialogs from blocking a turn transition while the MCP is active. The game may stay behind other windows after a match is loaded; avoid minimizing it when OCR or screenshots are required.
 
+### Register controller-triggered GUI tasks
+
+An SSH command runs in a non-interactive Windows session and cannot reliably launch or capture a game window on the signed-in desktop. While signed in locally to the worker, run this once:
+
+```powershell
+.\tools\Enable-Civ6WorkerGuiTasks.ps1
+```
+
+The script registers two on-demand tasks using the current user's interactive token:
+
+- `Civ6DesyncLab-LaunchCiv6` starts Steam app 289070 and then exits, so the task does not remain stuck in `Running` while the game is open.
+- `Civ6DesyncLab-CaptureDesktop` writes `C:\ProgramData\Civ6DesyncLab\worker-screen.png` for controller-side diagnosis.
+
+The controller can then use:
+
+```powershell
+ssh <worker-alias> "powershell -NoProfile -Command Start-ScheduledTask -TaskName Civ6DesyncLab-LaunchCiv6"
+ssh <worker-alias> "powershell -NoProfile -Command Start-ScheduledTask -TaskName Civ6DesyncLab-CaptureDesktop"
+scp <worker-alias>:C:/ProgramData/Civ6DesyncLab/worker-screen.png .
+```
+
+These tasks require the worker user to be logged in and the desktop to remain unlocked. They do not expose the Tuner port to the network.
+
+### Steam profile and license failures
+
+If Steam shows **Who's playing?**, select a remembered profile that owns Civilization VI before retrying the launch. A profile chooser can appear again after Steam restarts even when `AutoLoginUser` is set.
+
+Steam records the exact failure in `Steam\logs\console_log.txt`. This sequence means the selected profile has no Civ VI license:
+
+```text
+LaunchApp changed task to RequestingLicense
+LaunchApp failed with AppError_5
+```
+
+Do not reinstall the game for `AppError_5`: verify the selected Steam profile first. The install can be completely healthy in a shared Steam library while the active profile lacks the license. After changing profiles, trigger `Civ6DesyncLab-LaunchCiv6` again and confirm the log reaches `GameAction ... Completed` followed by `Game process added`.
+
 ## 6. Install a known-good save correctly
 
 Windows Documents may be redirected to OneDrive. Never assume `%USERPROFILE%\Documents`. Resolve it with:
