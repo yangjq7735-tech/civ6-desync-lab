@@ -2,6 +2,8 @@
 param(
     [int]$X,
     [int]$Y,
+    [int]$DragToX = -1,
+    [int]$DragToY = -1,
     [ValidateRange(0, 20)]
     [int]$TabCount = 0,
     [switch]$Enter,
@@ -80,7 +82,28 @@ public static class Civ6InteractiveInput
         return SendInput(2, keys, Marshal.SizeOf(typeof(INPUT)));
     }
 
-    public static uint ClickAndEnter(uint processId, int x, int y, int tabCount, bool pressEnter)
+    static uint SendPointer(int x, int y, int dragToX, int dragToY)
+    {
+        SetCursorPos(x, y);
+        INPUT[] down = new INPUT[1];
+        down[0].type = 0; down[0].U.mi.dwFlags = 0x0002;
+        uint sent = SendInput(1, down, Marshal.SizeOf(typeof(INPUT)));
+
+        if (dragToX >= 0 && dragToY >= 0) {
+            for (int step = 1; step <= 20; step++) {
+                int nextX = x + ((dragToX - x) * step / 20);
+                int nextY = y + ((dragToY - y) * step / 20);
+                SetCursorPos(nextX, nextY);
+                System.Threading.Thread.Sleep(15);
+            }
+        }
+
+        INPUT[] up = new INPUT[1];
+        up[0].type = 0; up[0].U.mi.dwFlags = 0x0004;
+        return sent + SendInput(1, up, Marshal.SizeOf(typeof(INPUT)));
+    }
+
+    public static uint ClickAndEnter(uint processId, int x, int y, int dragToX, int dragToY, int tabCount, bool pressEnter)
     {
         IntPtr hWnd = FindWindow(processId);
         if (hWnd == IntPtr.Zero) return 0;
@@ -96,12 +119,7 @@ public static class Civ6InteractiveInput
         SetForegroundWindow(hWnd);
         SetActiveWindow(hWnd);
         SetFocus(hWnd);
-        SetCursorPos(x, y);
-
-        INPUT[] mouse = new INPUT[2];
-        mouse[0].type = 0; mouse[0].U.mi.dwFlags = 0x0002;
-        mouse[1].type = 0; mouse[1].U.mi.dwFlags = 0x0004;
-        uint sent = SendInput(2, mouse, Marshal.SizeOf(typeof(INPUT)));
+        uint sent = SendPointer(x, y, dragToX, dragToY);
 
         System.Threading.Thread.Sleep(300);
         for (int i = 0; i < tabCount; i++) { sent += SendKey(0x09); System.Threading.Thread.Sleep(100); }
@@ -111,13 +129,9 @@ public static class Civ6InteractiveInput
         return sent;
     }
 
-    public static uint SendAt(int x, int y, int tabCount, bool pressEnter)
+    public static uint SendAt(int x, int y, int dragToX, int dragToY, int tabCount, bool pressEnter)
     {
-        SetCursorPos(x, y);
-        INPUT[] mouse = new INPUT[2];
-        mouse[0].type = 0; mouse[0].U.mi.dwFlags = 0x0002;
-        mouse[1].type = 0; mouse[1].U.mi.dwFlags = 0x0004;
-        uint sent = SendInput(2, mouse, Marshal.SizeOf(typeof(INPUT)));
+        uint sent = SendPointer(x, y, dragToX, dragToY);
         System.Threading.Thread.Sleep(300);
         for (int i = 0; i < tabCount; i++) { sent += SendKey(0x09); System.Threading.Thread.Sleep(100); }
         if (pressEnter) sent += SendKey(0x0D);
@@ -128,7 +142,8 @@ public static class Civ6InteractiveInput
 
 $process = $null
 if ($SkipFocus) {
-    $sent = [Civ6InteractiveInput]::SendAt($X, $Y, $TabCount, $Enter.IsPresent)
+    $sent = [Civ6InteractiveInput]::SendAt(
+        $X, $Y, $DragToX, $DragToY, $TabCount, $Enter.IsPresent)
 } else {
     $candidates = @(Get-Process -Name $ProcessName -ErrorAction SilentlyContinue)
     if (-not $candidates) {
@@ -137,7 +152,7 @@ if ($SkipFocus) {
     $sent = 0
     foreach ($candidate in ($candidates | Sort-Object StartTime -Descending)) {
         $candidateSent = [Civ6InteractiveInput]::ClickAndEnter(
-            [uint32]$candidate.Id, $X, $Y, $TabCount, $Enter.IsPresent)
+            [uint32]$candidate.Id, $X, $Y, $DragToX, $DragToY, $TabCount, $Enter.IsPresent)
         if ($candidateSent -gt 0) {
             $process = $candidate
             $sent = $candidateSent
@@ -154,5 +169,7 @@ if ($sent -eq 0) {
     processId = if ($process) { $process.Id } else { $null }
     x         = $X
     y         = $Y
+    dragToX   = $DragToX
+    dragToY   = $DragToY
     events    = $sent
 } | ConvertTo-Json
