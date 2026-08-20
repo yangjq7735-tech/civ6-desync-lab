@@ -14,6 +14,7 @@ The first phase is deliberately conservative: establish a clean vanilla baseline
 ## Included files
 
 - `tools/Test-Civ6Environment.ps1` — checks Civ VI's diagnostic folder and writes a non-sensitive preflight report.
+- `tools/Test-Civ6Remote.ps1` — verifies PC B's advertised SSH host fingerprint before testing key authentication.
 - `tools/Capture-Civ6Snapshot.ps1` — copies the current Civ VI logs, including files that the running game has open, and generates SHA-256 manifests.
 - `tools/Compare-Civ6Snapshots.ps1` — compares paired manifests and isolates explicit state/desync marker lines when present.
 - `tools/Test-Kit.ps1` — parses every included PowerShell file and runs the comparator against synthetic paired snapshots.
@@ -70,6 +71,19 @@ If your installation uses another location, pass `-CivRoot` to the scripts.
 7. Compare both reports. Resolve differences in game build, DLC, storefront, enabled mods, and configuration before starting `V000`.
 
 The preflight hashes `AppOptions.txt` without copying its contents. Different hashes are a prompt to inspect configuration, not proof of a multiplayer problem.
+
+## Verify PC B's SSH identity
+
+After PC B reports its LAN address, Windows username, and ED25519 host-key fingerprint, verify all three before running any remote command:
+
+```powershell
+.\tools\Test-Civ6Remote.ps1 `
+  -ComputerName 192.168.50.36 `
+  -UserName pc-b-user `
+  -ExpectedHostFingerprint 'SHA256:replace-with-pc-b-fingerprint'
+```
+
+The verifier uses a temporary `known_hosts` file, refuses mismatched host keys, requires the dedicated Civ VI lab identity key, and performs a read-only PowerShell probe with password prompts disabled. A successful run ends with `PASS: PC B SSH host identity and key authentication verified.`
 
 ## Run the vanilla baseline
 
