@@ -74,6 +74,14 @@ The preflight hashes `AppOptions.txt` without copying its contents. Different ha
 
 ## Verify PC B's SSH identity
 
+On PC B, open an elevated PowerShell in this repository and run the idempotent bootstrap once:
+
+```powershell
+.\tools\Enable-Civ6RemoteSsh.ps1
+```
+
+It installs PC A's dedicated public key in Windows OpenSSH's administrator key file, repairs the file ACL, starts `sshd`, enables a Private-network/LocalSubnet firewall rule, and prints PC B's username, IPv4 addresses, and ED25519 host-key fingerprint. The private key never leaves PC A. A direct Ethernet cable can improve reachability but does not replace this authentication setup.
+
 After PC B reports its LAN address, Windows username, and ED25519 host-key fingerprint, verify all three before running any remote command:
 
 ```powershell
