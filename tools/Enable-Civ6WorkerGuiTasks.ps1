@@ -57,8 +57,11 @@ $captureAction = New-ScheduledTaskAction `
     -Execute 'powershell.exe' `
     -Argument ('-NoProfile -WindowStyle Hidden -EncodedCommand ' + (ConvertTo-EncodedPowerShellCommand -Script $captureScript))
 
+$currentIdentity = [Security.Principal.WindowsIdentity]::GetCurrent()
+$currentUserSid = $currentIdentity.User.Value
+
 $principal = New-ScheduledTaskPrincipal `
-    -UserId ("{0}\{1}" -f $env:USERDOMAIN, $env:USERNAME) `
+    -UserId $currentUserSid `
     -LogonType Interactive `
     -RunLevel Highest
 $settings = New-ScheduledTaskSettingsSet `
@@ -91,7 +94,8 @@ if ($PSCmdlet.ShouldProcess($captureTaskName, 'Register interactive worker deskt
 
 [ordered]@{
     status          = 'ready'
-    user            = $principal.UserId
+    user            = $currentIdentity.Name
+    userSid         = $currentUserSid
     launchTask      = $launchTaskName
     captureTask     = $captureTaskName
     capturePath     = $CapturePath
