@@ -146,6 +146,8 @@ uv run --frozen python <lab-repo>\scripts\civ6_mcp_call.py get_game_overview
 
 Expected output contains a turn number, civilization, leader, difficulty, yields, city count, and unit count.
 
+The helper serializes calls made on the same Windows PC. This is required because the current upstream MCP server starts its dashboard API on fixed port `8000`; overlapping server processes would otherwise race for that port. The default wait is 120 seconds and can be changed with `--lock-timeout`.
+
 ## 8. Multiplayer/desync discipline
 
 - Use one run ID and one action script across every machine.
@@ -154,4 +156,3 @@ Expected output contains a turn number, civilization, leader, difficulty, yields
 - Do not use arbitrary local `run_lua` mutations during the vanilla baseline.
 - Stop at the first divergence and preserve both saves and log directories.
 - Disable the Tuner and all mods for `V000`; enable diagnostic components one variable at a time afterward.
-
