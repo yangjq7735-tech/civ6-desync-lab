@@ -106,7 +106,11 @@ public static class Civ6InteractiveInput
 }
 '@
 
-$process = Get-Process -Name $ProcessName -ErrorAction SilentlyContinue | Select-Object -First 1
+$candidates = @(Get-Process -Name $ProcessName -ErrorAction SilentlyContinue)
+$process = $candidates | Where-Object MainWindowHandle -ne 0 | Select-Object -First 1
+if (-not $process) {
+    $process = $candidates | Select-Object -First 1
+}
 if (-not $process) {
     throw "No matching Civ VI process is running: $($ProcessName -join ', ')"
 }
