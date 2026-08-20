@@ -3,7 +3,7 @@
 
 [CmdletBinding()]
 param(
-    [string]$ControllerPublicKey = 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJT6vdy6WQK/yJH2qD03i8U0yMX6lKZ+eukqp8MDLnsj civ6-desync-lab-primary'
+    [string]$ControllerPublicKey = 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMcDepdfnlefcsYnzJpWMFRPptZVbT5J/AnrHcGtFsUI civ6-desync-lab-automation'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -89,7 +89,7 @@ $addresses = @(
     userName                = $env:USERNAME
     authorizedKeysPath      = $authorizedKeys
     controllerKeyInstalled  = $true
-    controllerKeyFingerprint = 'SHA256:pW9mClKd/d58tMkSxqd3BCYbv0aJtp7RO4HADynCuVA'
+    controllerKeyFingerprint = 'SHA256:kbvA0ggH/viDLxqyts3Tfn3e2mTa0kijFrdkZDOTZgc'
     sshdStatus              = (Get-Service -Name 'sshd').Status.ToString()
     hostKeyFingerprint      = $fingerprint
     ipv4Addresses           = $addresses

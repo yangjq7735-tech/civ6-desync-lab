@@ -12,7 +12,7 @@ param(
     [ValidatePattern('^SHA256:[A-Za-z0-9+/]+={0,2}$')]
     [string]$ExpectedHostFingerprint,
 
-    [string]$IdentityFile = (Join-Path $env:USERPROFILE '.ssh\civ6_desync_lab_ed25519'),
+    [string]$IdentityFile = (Join-Path $env:USERPROFILE '.ssh\civ6_desync_lab_automation_ed25519'),
 
     [ValidateRange(1, 65535)]
     [int]$Port = 22,
