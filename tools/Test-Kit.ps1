@@ -40,12 +40,37 @@ try {
     New-Item -ItemType Directory -Path $integrationTools -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $fakeCivRoot 'Logs') -Force | Out-Null
     'Synthetic Civ VI log' | Set-Content -LiteralPath (Join-Path $fakeCivRoot 'Logs\Lua.log') -Encoding UTF8
-    'Synthetic options' | Set-Content -LiteralPath (Join-Path $fakeCivRoot 'AppOptions.txt') -Encoding UTF8
+    @(
+        'RenderWidth 3840'
+        'RenderHeight 2160'
+        'FullScreen 1'
+        'EnableTuner 0'
+    ) | Set-Content -LiteralPath (Join-Path $fakeCivRoot 'AppOptions.txt') -Encoding UTF8
+    'AutoEndTurn 1' | Set-Content -LiteralPath (Join-Path $fakeCivRoot 'UserOptions.txt') -Encoding UTF8
 
     $preflightScript = Join-Path $integrationTools 'Test-Civ6Environment.ps1'
     $captureScript = Join-Path $integrationTools 'Capture-Civ6Snapshot.ps1'
+    $optionsScript = Join-Path $integrationTools 'Set-Civ6AutomationOptions.ps1'
     Copy-Item -LiteralPath (Join-Path $toolsRoot 'Test-Civ6Environment.ps1') -Destination $preflightScript
     Copy-Item -LiteralPath (Join-Path $toolsRoot 'Capture-Civ6Snapshot.ps1') -Destination $captureScript
+    Copy-Item -LiteralPath (Join-Path $toolsRoot 'Set-Civ6AutomationOptions.ps1') -Destination $optionsScript
+
+    & $optionsScript -CivRoot $fakeCivRoot -RenderWidth 1600 -RenderHeight 900 -WarningAction SilentlyContinue
+    $configuredAppOptions = Get-Content -LiteralPath (Join-Path $fakeCivRoot 'AppOptions.txt') -Raw
+    $configuredUserOptions = Get-Content -LiteralPath (Join-Path $fakeCivRoot 'UserOptions.txt') -Raw
+    foreach ($expectedOption in @('RenderWidth 1600', 'RenderHeight 900', 'FullScreen 0', 'EnableTuner 1')) {
+        if ($configuredAppOptions -notmatch ('(?m)^' + [regex]::Escape($expectedOption) + '\r?$')) {
+            throw "Automation options test did not set '$expectedOption'."
+        }
+    }
+    if ($configuredUserOptions -notmatch '(?m)^AutoEndTurn 0\r?$') {
+        throw 'Automation options test did not disable AutoEndTurn.'
+    }
+    $optionBackups = @(Get-ChildItem -LiteralPath $fakeCivRoot -Filter '*.bak' -File)
+    if ($optionBackups.Count -ne 2) {
+        throw "Expected two option backups; found $($optionBackups.Count)."
+    }
+    Write-Host 'PASS: Civ VI automation options and backups.'
 
     & $preflightScript -Pc A -CivRoot $fakeCivRoot
     $preflightFiles = @(Get-ChildItem -LiteralPath (Join-Path $testRoot 'preflight') -Filter '*.json' -File)

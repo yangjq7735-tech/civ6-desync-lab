@@ -90,7 +90,15 @@ steamapps\common\Sid Meier's Civilization VI SDK\FireTuner\FireTuner2.exe
 
 ## 5. Initialize and configure Civ VI
 
-Launch Civ VI once and reach the main menu so the local option files are created. Exit cleanly, then configure:
+Launch Civ VI once and reach the main menu so the local option files are created. Exit cleanly, then run:
+
+```powershell
+.\tools\Set-Civ6AutomationOptions.ps1 `
+  -RenderWidth 1600 `
+  -RenderHeight 900
+```
+
+The script creates timestamped backups and sets the following values:
 
 `%LOCALAPPDATA%\Firaxis Games\Sid Meier's Civilization VI\AppOptions.txt`
 
@@ -107,7 +115,7 @@ RenderHeight 900
 AutoEndTurn 0
 ```
 
-Back up each option file before editing. `EnableTuner 1` disables Steam achievements while it remains enabled. Restore `EnableTuner 0` before the strict vanilla `V000` baseline.
+`EnableTuner 1` disables Steam achievements while it remains enabled. Restore it before the strict vanilla baseline with `Set-Civ6AutomationOptions.ps1 -TunerEnabled 0`.
 
 Windowed 1600×900 is preferred for reliable OCR loading without monopolizing the worker's desktop. The game may stay behind other windows after a match is loaded; avoid minimizing it when OCR or screenshots are required.
 

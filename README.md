@@ -17,6 +17,7 @@ The first phase is deliberately conservative: establish a clean vanilla baseline
 - `tools/Test-Civ6Remote.ps1` — verifies PC B's advertised SSH host fingerprint before testing key authentication.
 - `tools/Enable-Civ6RemoteSsh.ps1` — performs the idempotent Windows OpenSSH worker bootstrap.
 - `tools/Initialize-Civ6WorkerRuntime.ps1` — installs Git/`uv`, creates a separate upstream MCP runtime, and validates it.
+- `tools/Set-Civ6AutomationOptions.ps1` — safely backs up and configures the Civ VI Tuner, window size, and turn behavior.
 - `tools/Capture-Civ6Snapshot.ps1` — copies the current Civ VI logs, including files that the running game has open, and generates SHA-256 manifests.
 - `tools/Compare-Civ6Snapshots.ps1` — compares paired manifests and isolates explicit state/desync marker lines when present.
 - `tools/Test-Kit.ps1` — parses every included PowerShell file and runs the comparator against synthetic paired snapshots.
