@@ -3,6 +3,7 @@ param(
     [int]$X,
     [int]$Y,
     [switch]$Enter,
+    [switch]$SkipFocus,
     [string[]]$ProcessName = @('CivilizationVI_DX12', 'CivilizationVI')
 )
 
@@ -103,26 +104,47 @@ public static class Civ6InteractiveInput
         AttachThreadInput(currentThread, foregroundThread, false);
         return sent;
     }
+
+    public static uint SendAt(int x, int y, bool pressEnter)
+    {
+        SetCursorPos(x, y);
+        INPUT[] mouse = new INPUT[2];
+        mouse[0].type = 0; mouse[0].U.mi.dwFlags = 0x0002;
+        mouse[1].type = 0; mouse[1].U.mi.dwFlags = 0x0004;
+        uint sent = SendInput(2, mouse, Marshal.SizeOf(typeof(INPUT)));
+        if (pressEnter) {
+            System.Threading.Thread.Sleep(500);
+            INPUT[] keys = new INPUT[2];
+            keys[0].type = 1; keys[0].U.ki.wVk = 0x0D;
+            keys[1].type = 1; keys[1].U.ki.wVk = 0x0D; keys[1].U.ki.dwFlags = 0x0002;
+            sent += SendInput(2, keys, Marshal.SizeOf(typeof(INPUT)));
+        }
+        return sent;
+    }
 }
 '@
 
-$candidates = @(Get-Process -Name $ProcessName -ErrorAction SilentlyContinue)
-$process = $candidates | Where-Object MainWindowHandle -ne 0 | Select-Object -First 1
-if (-not $process) {
-    $process = $candidates | Select-Object -First 1
+$process = $null
+if ($SkipFocus) {
+    $sent = [Civ6InteractiveInput]::SendAt($X, $Y, $Enter.IsPresent)
+} else {
+    $candidates = @(Get-Process -Name $ProcessName -ErrorAction SilentlyContinue)
+    $process = $candidates | Where-Object MainWindowHandle -ne 0 | Select-Object -First 1
+    if (-not $process) {
+        $process = $candidates | Select-Object -First 1
+    }
+    if (-not $process) {
+        throw "No matching process is running: $($ProcessName -join ', ')"
+    }
+    $sent = [Civ6InteractiveInput]::ClickAndEnter([uint32]$process.Id, $X, $Y, $Enter.IsPresent)
 }
-if (-not $process) {
-    throw "No matching Civ VI process is running: $($ProcessName -join ', ')"
-}
-
-$sent = [Civ6InteractiveInput]::ClickAndEnter([uint32]$process.Id, $X, $Y, $Enter.IsPresent)
 if ($sent -eq 0) {
-    throw "No visible Civ VI window was found for process $($process.Id)."
+    throw 'No input events were accepted by Windows.'
 }
 
 [ordered]@{
     status    = 'sent'
-    processId = $process.Id
+    processId = if ($process) { $process.Id } else { $null }
     x         = $X
     y         = $Y
     events    = $sent
