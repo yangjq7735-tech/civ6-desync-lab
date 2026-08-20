@@ -2,6 +2,8 @@
 param(
     [int]$X,
     [int]$Y,
+    [ValidateRange(0, 20)]
+    [int]$TabCount = 0,
     [switch]$Enter,
     [switch]$SkipFocus,
     [string[]]$ProcessName = @('CivilizationVI_DX12', 'CivilizationVI')
@@ -70,7 +72,15 @@ public static class Civ6InteractiveInput
         return found;
     }
 
-    public static uint ClickAndEnter(uint processId, int x, int y, bool pressEnter)
+    static uint SendKey(ushort virtualKey)
+    {
+        INPUT[] keys = new INPUT[2];
+        keys[0].type = 1; keys[0].U.ki.wVk = virtualKey;
+        keys[1].type = 1; keys[1].U.ki.wVk = virtualKey; keys[1].U.ki.dwFlags = 0x0002;
+        return SendInput(2, keys, Marshal.SizeOf(typeof(INPUT)));
+    }
+
+    public static uint ClickAndEnter(uint processId, int x, int y, int tabCount, bool pressEnter)
     {
         IntPtr hWnd = FindWindow(processId);
         if (hWnd == IntPtr.Zero) return 0;
@@ -93,32 +103,24 @@ public static class Civ6InteractiveInput
         mouse[1].type = 0; mouse[1].U.mi.dwFlags = 0x0004;
         uint sent = SendInput(2, mouse, Marshal.SizeOf(typeof(INPUT)));
 
-        if (pressEnter) {
-            System.Threading.Thread.Sleep(500);
-            INPUT[] keys = new INPUT[2];
-            keys[0].type = 1; keys[0].U.ki.wVk = 0x0D;
-            keys[1].type = 1; keys[1].U.ki.wVk = 0x0D; keys[1].U.ki.dwFlags = 0x0002;
-            sent += SendInput(2, keys, Marshal.SizeOf(typeof(INPUT)));
-        }
+        System.Threading.Thread.Sleep(300);
+        for (int i = 0; i < tabCount; i++) { sent += SendKey(0x09); System.Threading.Thread.Sleep(100); }
+        if (pressEnter) sent += SendKey(0x0D);
         AttachThreadInput(currentThread, targetThread, false);
         AttachThreadInput(currentThread, foregroundThread, false);
         return sent;
     }
 
-    public static uint SendAt(int x, int y, bool pressEnter)
+    public static uint SendAt(int x, int y, int tabCount, bool pressEnter)
     {
         SetCursorPos(x, y);
         INPUT[] mouse = new INPUT[2];
         mouse[0].type = 0; mouse[0].U.mi.dwFlags = 0x0002;
         mouse[1].type = 0; mouse[1].U.mi.dwFlags = 0x0004;
         uint sent = SendInput(2, mouse, Marshal.SizeOf(typeof(INPUT)));
-        if (pressEnter) {
-            System.Threading.Thread.Sleep(500);
-            INPUT[] keys = new INPUT[2];
-            keys[0].type = 1; keys[0].U.ki.wVk = 0x0D;
-            keys[1].type = 1; keys[1].U.ki.wVk = 0x0D; keys[1].U.ki.dwFlags = 0x0002;
-            sent += SendInput(2, keys, Marshal.SizeOf(typeof(INPUT)));
-        }
+        System.Threading.Thread.Sleep(300);
+        for (int i = 0; i < tabCount; i++) { sent += SendKey(0x09); System.Threading.Thread.Sleep(100); }
+        if (pressEnter) sent += SendKey(0x0D);
         return sent;
     }
 }
@@ -126,7 +128,7 @@ public static class Civ6InteractiveInput
 
 $process = $null
 if ($SkipFocus) {
-    $sent = [Civ6InteractiveInput]::SendAt($X, $Y, $Enter.IsPresent)
+    $sent = [Civ6InteractiveInput]::SendAt($X, $Y, $TabCount, $Enter.IsPresent)
 } else {
     $candidates = @(Get-Process -Name $ProcessName -ErrorAction SilentlyContinue)
     $process = $candidates | Where-Object MainWindowHandle -ne 0 | Select-Object -First 1
@@ -136,7 +138,7 @@ if ($SkipFocus) {
     if (-not $process) {
         throw "No matching process is running: $($ProcessName -join ', ')"
     }
-    $sent = [Civ6InteractiveInput]::ClickAndEnter([uint32]$process.Id, $X, $Y, $Enter.IsPresent)
+    $sent = [Civ6InteractiveInput]::ClickAndEnter([uint32]$process.Id, $X, $Y, $TabCount, $Enter.IsPresent)
 }
 if ($sent -eq 0) {
     throw 'No input events were accepted by Windows.'
