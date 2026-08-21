@@ -23,6 +23,7 @@ The first phase is deliberately conservative: establish a clean vanilla baseline
 - `tools/Compare-Civ6Snapshots.ps1` — compares paired manifests and isolates explicit state/desync marker lines when present.
 - `tools/Find-Civ6ModSyncRisks.ps1` — statically audits installed mod gameplay scripts for client-local serialized-state writes.
 - `tools/Install-QuickDealsDesyncProbe.ps1` — installs the controlled, non-instrumented Quick Deals divergence probe into the current user's Civ VI Mods directory.
+- `tools/Install-Civ6MultiplayerSafeForks.ps1` — generates and installs three separate hash-gated safe forks for Quick Deals, Multiplayer Helper, and Tech Civic Progress Plus.
 - `tools/Test-Kit.ps1` — parses every included PowerShell file and runs the comparator against synthetic paired snapshots.
 - `ACTION-SCRIPT.md` — the fixed baseline procedure and escalation ladder.
 - `experiments/TEMPLATE.md` — copy this for every experiment.
@@ -31,6 +32,7 @@ The first phase is deliberately conservative: establish a clean vanilla baseline
 - `docs/WORKER-PC-BOOTSTRAP.md` — the repeatable PC B/PC C worker setup and readiness procedure.
 - `docs/STATIC-ANALYSIS.md` — Civ VI's reconstructed resync path and the Quick Deals multiplayer state-divergence finding.
 - `docs/MOD-AUDIT-2026-08-21.md` — static audit of the expanded Workshop set, including Multiplayer Helper and Tech Civic Progress Plus.
+- `docs/MULTIPLAYER-SAFE-FORKS.md` — installation, behavior changes, IDs, and limitations for the three safe forks.
 
 The diagnostic and comparison scripts do not edit Civ VI, enable FireTuner, inject code, or delete anything. The explicitly named worker bootstrap scripts install their documented prerequisites and configure SSH when the operator runs them.
 
