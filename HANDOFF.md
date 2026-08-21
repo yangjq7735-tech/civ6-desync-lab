@@ -26,7 +26,9 @@ Quick Deals is the leading hypothesis. Its UI calls an `AddGameplayScripts` cach
 
 ## QDP001 deployment state
 
-- PC A: probe installed at `C:\Users\99709\OneDrive\Documents\My Games\Sid Meier's Civilization VI\Mods\QuickDealsDesyncProbe`.
+- PC A: fully prepared without launching Civ VI. Probe installed at `C:\Users\99709\OneDrive\Documents\My Games\Sid Meier's Civilization VI\Mods\QuickDealsDesyncProbe`; all three installed hashes match the repository; Quick Deals and Quick Deals Desync Probe are enabled in selected offline mod group 2; other community mods remain disabled; `EnableTuner 0`; Civ VI stopped.
+- PC A rollback: pre-edit database backup is `C:\Users\99709\AppData\Local\Firaxis Games\Sid Meier's Civilization VI\Mods.sqlite.QDP001-20260821T010918413Z.bak`.
+- PC A baseline: `captures/QDP001/pre-run-PCA-20260821T010918697Z` contains the local pre-run snapshot and is intentionally ignored by Git.
 - PC B: not yet deployed because the previously verified SSH endpoint `192.168.50.36:22` is unreachable. Do not bypass host-key verification or scan unrelated LAN devices.
 - The probe uses no FireTuner, debugger, native hook, or memory modification.
 - Both PCs must have byte-identical probe files and Quick Deals enabled before the controlled run.
