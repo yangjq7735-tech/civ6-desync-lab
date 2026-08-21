@@ -33,6 +33,8 @@ The first phase is deliberately conservative: establish a clean vanilla baseline
 - `docs/STATIC-ANALYSIS.md` — Civ VI's reconstructed resync path and the Quick Deals multiplayer state-divergence finding.
 - `docs/MOD-AUDIT-2026-08-21.md` — static audit of the expanded Workshop set, including Multiplayer Helper and Tech Civic Progress Plus.
 - `docs/MULTIPLAYER-SAFE-FORKS.md` — installation, behavior changes, IDs, and limitations for the three safe forks.
+- `docs/STEAM-WORKSHOP-PUBLISHING.md` — licensing-safe plan for publishing three dependency-based compatibility patches.
+- `workshop-patches/` — three project-authored, dependency-based patches suitable for eventual Workshop upload after runtime validation.
 
 The diagnostic and comparison scripts do not edit Civ VI, enable FireTuner, inject code, or delete anything. The explicitly named worker bootstrap scripts install their documented prerequisites and configure SSH when the operator runs them.
 

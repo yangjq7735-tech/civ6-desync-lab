@@ -2,6 +2,7 @@
 captures/
 preflight/
 reports/
+artifacts/
 
 # Large or shareable artifacts should be attached deliberately, not committed.
 *.zip

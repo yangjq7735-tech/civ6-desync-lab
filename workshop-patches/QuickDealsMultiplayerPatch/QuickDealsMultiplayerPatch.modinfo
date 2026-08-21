@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Mod id="92ede0be-8e9c-47dc-bdc6-adae6a203cc3" version="1">
+  <Properties>
+    <Name>Quick Deals - Multiplayer Safety Patch</Name>
+    <Description>Compatibility patch for Quick Deals that keeps its UI cache out of synchronized Player properties.</Description>
+    <Teaser>Removes a client-local serialized-state write from Quick Deals.</Teaser>
+    <Authors>civ6-desync-lab contributors</Authors>
+    <CompatibleVersions>2.0</CompatibleVersions>
+    <AffectsSavedGames>0</AffectsSavedGames>
+  </Properties>
+  <Dependencies>
+    <Mod id="5aceed03-8639-4a81-8cbf-03f54d543502" title="Quick Deals" />
+  </Dependencies>
+  <Blocks>
+    <Mod id="7e3bce14-956e-4223-ae08-b1788ae7d257" title="Quick Deals - Multiplayer Safe (local full fork)" />
+  </Blocks>
+  <InGameActions>
+    <AddGameplayScripts id="QDMultiplayerSafetyPatch">
+      <Properties>
+        <LoadOrder>100000</LoadOrder>
+      </Properties>
+      <File>qd_multiplayer_safety_patch.lua</File>
+    </AddGameplayScripts>
+  </InGameActions>
+  <Files>
+    <File>qd_multiplayer_safety_patch.lua</File>
+  </Files>
+</Mod>

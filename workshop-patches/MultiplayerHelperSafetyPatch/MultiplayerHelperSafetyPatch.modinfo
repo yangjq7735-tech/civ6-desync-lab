@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Mod id="ed588376-d422-4bd1-8034-80caaf18f974" version="1">
+  <Properties>
+    <Name>Multiplayer Helper - Multiplayer Safety Patch</Name>
+    <Description>Compatibility patch that detaches client-local GameCore mutation handlers from Multiplayer Helper 1.6.7.</Description>
+    <Teaser>Disables MPH handlers that can mutate divergent simulation state.</Teaser>
+    <Authors>civ6-desync-lab contributors</Authors>
+    <CompatibleVersions>2.0</CompatibleVersions>
+    <AffectsSavedGames>0</AffectsSavedGames>
+  </Properties>
+  <Dependencies>
+    <Mod id="619ac86e-d99d-4bf3-b8f0-8c5b8c402176" title="Multiplayer Helper (MPH)" />
+  </Dependencies>
+  <Blocks>
+    <Mod id="947f97ba-d2e8-49fe-af14-dd0432737259" title="Multiplayer Helper - Multiplayer Safe (local full fork)" />
+  </Blocks>
+  <InGameActions>
+    <AddGameplayScripts id="MPHMultiplayerSafetyPatch">
+      <Properties>
+        <LoadOrder>100000</LoadOrder>
+      </Properties>
+      <File>mph_multiplayer_safety_patch.lua</File>
+    </AddGameplayScripts>
+  </InGameActions>
+  <Files>
+    <File>mph_multiplayer_safety_patch.lua</File>
+  </Files>
+</Mod>

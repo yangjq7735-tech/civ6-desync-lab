@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Mod id="4a7bb1f2-6412-4c82-b152-f7e3ee732174" version="1">
+  <Properties>
+    <Name>Tech Civic Progress Plus - Multiplayer Safety Patch</Name>
+    <Description>Compatibility patch that disables mutation-based technology overflow probing.</Description>
+    <Teaser>Prevents tooltip calculation from rewriting live research state.</Teaser>
+    <Authors>civ6-desync-lab contributors</Authors>
+    <CompatibleVersions>2.0</CompatibleVersions>
+    <AffectsSavedGames>0</AffectsSavedGames>
+  </Properties>
+  <Dependencies>
+    <Mod id="8446e6e9-7703-434d-ba10-0bd70a291d28" title="Tech Civic Progress Plus" />
+  </Dependencies>
+  <Blocks>
+    <Mod id="1317e07f-bc75-4321-ac90-4b76f43d8bec" title="Tech Civic Progress Plus - Multiplayer Safe (local full fork)" />
+  </Blocks>
+  <InGameActions>
+    <AddGameplayScripts id="TCPPMultiplayerSafetyPatch">
+      <Properties>
+        <LoadOrder>100000</LoadOrder>
+      </Properties>
+      <File>tcpp_multiplayer_safety_patch.lua</File>
+    </AddGameplayScripts>
+  </InGameActions>
+  <Files>
+    <File>tcpp_multiplayer_safety_patch.lua</File>
+  </Files>
+</Mod>
