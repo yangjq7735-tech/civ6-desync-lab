@@ -22,9 +22,11 @@ The first phase is deliberately conservative: establish a clean vanilla baseline
 - `tools/Capture-Civ6Snapshot.ps1` — copies the current Civ VI logs, including files that the running game has open, and generates SHA-256 manifests.
 - `tools/Compare-Civ6Snapshots.ps1` — compares paired manifests and isolates explicit state/desync marker lines when present.
 - `tools/Find-Civ6ModSyncRisks.ps1` — statically audits installed mod gameplay scripts for client-local serialized-state writes.
+- `tools/Install-QuickDealsDesyncProbe.ps1` — installs the controlled, non-instrumented Quick Deals divergence probe into the current user's Civ VI Mods directory.
 - `tools/Test-Kit.ps1` — parses every included PowerShell file and runs the comparator against synthetic paired snapshots.
 - `ACTION-SCRIPT.md` — the fixed baseline procedure and escalation ladder.
 - `experiments/TEMPLATE.md` — copy this for every experiment.
+- `experiments/QDP001-controlled-quick-deals-divergence.md` — exact evidence contract for validating the Quick Deals theory.
 - `HANDOFF.md` — concise engineering state for future Codex/ChatGPT work.
 - `docs/WORKER-PC-BOOTSTRAP.md` — the repeatable PC B/PC C worker setup and readiness procedure.
 - `docs/STATIC-ANALYSIS.md` — Civ VI's reconstructed resync path and the Quick Deals multiplayer state-divergence finding.

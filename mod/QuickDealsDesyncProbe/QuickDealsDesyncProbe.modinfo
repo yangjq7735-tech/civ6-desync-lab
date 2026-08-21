@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Mod id="c44f70af-b40d-4e23-b030-a5040d3dcd2e" version="1">
+  <Properties>
+    <Name>Quick Deals Desync Probe</Name>
+    <Authors>Civ VI Desync Lab</Authors>
+    <Teaser>Controlled diagnostic for Quick Deals multiplayer state divergence.</Teaser>
+    <Description>Calls Quick Deals' own cache bridge once after a multiplayer game view loads, writing a client-specific marker so Civ VI's native synchronization response can be observed. Diagnostic use only.</Description>
+    <AffectsSavedGames>0</AffectsSavedGames>
+    <CompatibleVersions>1.2,2.0</CompatibleVersions>
+  </Properties>
+  <Dependencies>
+    <Mod id="5aceed03-8639-4a81-8cbf-03f54d543502" title="Quick Deals" />
+  </Dependencies>
+  <InGameActions>
+    <AddUserInterfaces id="QDDesyncProbe_UI">
+      <Properties>
+        <Context>InGame</Context>
+        <LoadOrder>999999</LoadOrder>
+      </Properties>
+      <File>QuickDealsDesyncProbe.xml</File>
+    </AddUserInterfaces>
+  </InGameActions>
+  <Files>
+    <File>QuickDealsDesyncProbe.lua</File>
+    <File>QuickDealsDesyncProbe.xml</File>
+  </Files>
+</Mod>

@@ -127,6 +127,38 @@ player:SetProperty("LOCAL_UI_CACHE", {})
     }
     Write-Host 'PASS: static mod synchronization-risk audit.'
 
+    $probeSource = Join-Path $toolsRoot '..\mod\QuickDealsDesyncProbe'
+    $probeManifest = Get-Content -LiteralPath (Join-Path $probeSource 'QuickDealsDesyncProbe.modinfo') -Raw
+    $probeLua = Get-Content -LiteralPath (Join-Path $probeSource 'QuickDealsDesyncProbe.lua') -Raw
+    if ($probeManifest -notmatch '5aceed03-8639-4a81-8cbf-03f54d543502') {
+        throw 'Quick Deals probe does not declare the expected Quick Deals dependency.'
+    }
+    foreach ($expectedProbeSource in @(
+        'GameConfiguration.IsAnyMultiplayer()'
+        'Game.GetLocalPlayer()'
+        'ExposedMembers.QD'
+        'cacheManager.SetCachedDeals(marker, true)'
+        'QD_DESYNC_PROBE'
+    )) {
+        if (-not $probeLua.Contains($expectedProbeSource)) {
+            throw "Quick Deals probe is missing expected source: '$expectedProbeSource'."
+        }
+    }
+    foreach ($forbiddenProbeSource in @('os.execute', 'io.open', 'DllImport', 'LoadLibrary')) {
+        if ($probeLua -match [regex]::Escape($forbiddenProbeSource)) {
+            throw "Quick Deals probe contains forbidden instrumentation source: '$forbiddenProbeSource'."
+        }
+    }
+
+    $probeInstallRoot = Join-Path $testRoot 'probe-mods'
+    $probeInstaller = Join-Path $toolsRoot 'Install-QuickDealsDesyncProbe.ps1'
+    & $probeInstaller -DestinationRoot $probeInstallRoot | Out-Null
+    $installedProbeFiles = @(Get-ChildItem -LiteralPath (Join-Path $probeInstallRoot 'QuickDealsDesyncProbe') -File)
+    if ($installedProbeFiles.Count -ne 3) {
+        throw "Expected three installed probe files; found $($installedProbeFiles.Count)."
+    }
+    Write-Host 'PASS: controlled Quick Deals divergence probe and installer.'
+
     $snapshotA = Join-Path $testRoot 'snapshot-a'
     $snapshotB = Join-Path $testRoot 'snapshot-b'
     $reportPath = Join-Path $testRoot 'comparison.json'

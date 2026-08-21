@@ -21,6 +21,15 @@ Quick Deals is the leading hypothesis. Its UI calls an `AddGameplayScripts` cach
 - A static mod synchronization-risk scanner (`tools/Find-Civ6ModSyncRisks.ps1`).
 - A code-level report (`docs/STATIC-ANALYSIS.md`) documenting Civ VI's resync pipeline and the Quick Deals defect.
 - A scan of all 20 currently installed Workshop manifests: Quick Deals is the sole critical finding; Detailed Wonder Reminder is the sole lower-priority review item.
+- Controlled validation mod `mod/QuickDealsDesyncProbe`, which calls Quick Deals' exact cache bridge with a client-specific marker after multiplayer game-view load.
+- An installer and evidence contract for experiment `QDP001`; all static and synthetic kit tests pass.
+
+## QDP001 deployment state
+
+- PC A: probe installed at `C:\Users\99709\OneDrive\Documents\My Games\Sid Meier's Civilization VI\Mods\QuickDealsDesyncProbe`.
+- PC B: not yet deployed because the previously verified SSH endpoint `192.168.50.36:22` is unreachable. Do not bypass host-key verification or scan unrelated LAN devices.
+- The probe uses no FireTuner, debugger, native hook, or memory modification.
+- Both PCs must have byte-identical probe files and Quick Deals enabled before the controlled run.
 
 ## Important limitation
 
@@ -28,12 +37,11 @@ The defect is proven, but historical causation is not. Existing paired captures 
 
 ## Next actions
 
-1. Disable Quick Deals on both PCs while holding the save, host, network mode, DLC, other mods, and action sequence fixed.
-2. Run through the normal Internet multiplayer path across the usual failure interval twice.
-3. Re-enable only Quick Deals and repeat from the same save/checkpoint.
-4. Capture paired logs immediately if a reload occurs; do not attach FireTuner.
-5. If Quick Deals is causal, fix it upstream or replace its synchronized property cache with UI-local Lua tables. Do not patch the Steam Workshop directory in place.
-6. If it is not causal, repeat the same A/B process with Detailed Wonder Reminder, then bisect the remaining mod set.
+1. Restore PC B reachability at its verified SSH endpoint or obtain its new IP and independently verify the same stored ED25519 host fingerprint.
+2. Deploy and hash-compare `QuickDealsDesyncProbe` on PC B.
+3. Enable Quick Deals and Quick Deals Desync Probe on both PCs.
+4. Enter one normal Internet multiplayer game and capture both clients' `QD_DESYNC_PROBE` markers plus native snapshot/desync markers.
+5. If the native mismatch follows the controlled write, implement the general deterministic-state guard and Quick Deals adapter; do not patch the Workshop directory in place.
 
 ## Questions for the first session
 
