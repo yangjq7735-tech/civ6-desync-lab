@@ -22,7 +22,16 @@ function Get-ModName {
 
     $nameNode = $Manifest.SelectSingleNode("//*[local-name()='Properties']/*[local-name()='Name']")
     if ($null -ne $nameNode -and -not [string]::IsNullOrWhiteSpace($nameNode.InnerText)) {
-        return $nameNode.InnerText.Trim()
+        $name = $nameNode.InnerText.Trim()
+        if ($name -like 'LOC_*') {
+            $localizedNode = $Manifest.SelectSingleNode(
+                "//*[local-name()='LocalizedText']/*[local-name()='Text' and @id='$name']/*[local-name()='en_US']"
+            )
+            if ($null -ne $localizedNode -and -not [string]::IsNullOrWhiteSpace($localizedNode.InnerText)) {
+                return $localizedNode.InnerText.Trim()
+            }
+        }
+        return $name
     }
 
     return $ManifestFile.BaseName
@@ -42,7 +51,9 @@ foreach ($manifestFile in $manifestFiles) {
             manifest       = $manifestFile.FullName
             script         = $null
             propertyWrites = 0
+            directMutations = 0
             localIdentity  = $false
+            uiEventBridge  = $false
             unorderedPairs = $false
             reason         = "Manifest could not be parsed: $($_.Exception.Message)"
         })
@@ -68,7 +79,9 @@ foreach ($manifestFile in $manifestFiles) {
                 manifest       = $manifestFile.FullName
                 script         = $scriptPath
                 propertyWrites = 0
+                directMutations = 0
                 localIdentity  = $false
+                uiEventBridge  = $false
                 unorderedPairs = $false
                 reason         = 'Gameplay script declared by manifest was not found.'
             })
@@ -77,18 +90,26 @@ foreach ($manifestFile in $manifestFiles) {
 
         $source = Get-Content -LiteralPath $scriptPath -Raw
         $propertyWriteMatches = @([regex]::Matches($source, '(?im)(?:\:|\.)SetProperty\s*\('))
-        if ($propertyWriteMatches.Count -eq 0) {
+        $directMutationMatches = @([regex]::Matches(
+            $source,
+            '(?im)(?:\:|\.)Set(?:Property|ResearchProgress|CulturalProgress|ProgressingCivic|ResearchingTech)\s*\(|UnitManager\.ChangeMovesRemaining\s*\(|CityManager\.DestroyCity\s*\(|(?:\:|\.)Destroy\s*\('
+        ))
+        if ($directMutationMatches.Count -eq 0) {
             continue
         }
 
         $usesLocalIdentity = $source -match '(?i)Game\.GetLocalPlayer\s*\('
+        $usesUiEventBridge = $source -match '(?im)\b(?:LuaEvents|UIEvents|SDEvents)\.[A-Za-z0-9_]+\.Add\s*\('
         $usesUnorderedPairs = $source -match '(?m)\bpairs\s*\('
-        $severity = if ($usesLocalIdentity) { 'critical' } else { 'review' }
+        $severity = if ($usesLocalIdentity -or $usesUiEventBridge) { 'critical' } else { 'review' }
         $reason = if ($usesLocalIdentity) {
-            'Gameplay script combines client-local player identity with serialized property writes; clients can mutate different simulation state.'
+            'Gameplay script combines client-local player identity with direct GameCore mutation; clients can mutate different simulation state.'
+        }
+        elseif ($usesUiEventBridge) {
+            'Gameplay script lets client-local UI/Lua events invoke direct GameCore mutations without a synchronized player operation.'
         }
         else {
-            'Gameplay script writes serialized properties; verify every write is triggered deterministically with identical data on every client.'
+            'Gameplay script directly mutates GameCore; verify every mutation is triggered deterministically with identical values on every client.'
         }
 
         if ($usesUnorderedPairs) {
@@ -101,7 +122,9 @@ foreach ($manifestFile in $manifestFiles) {
             manifest       = $manifestFile.FullName
             script         = $scriptPath
             propertyWrites = $propertyWriteMatches.Count
+            directMutations = $directMutationMatches.Count
             localIdentity  = $usesLocalIdentity
+            uiEventBridge  = $usesUiEventBridge
             unorderedPairs = $usesUnorderedPairs
             reason         = $reason
         })
@@ -128,7 +151,7 @@ foreach ($finding in $orderedFindings) {
 }
 
 $result = [ordered]@{
-    schemaVersion = 1
+    schemaVersion = 2
     generatedUtc  = [DateTime]::UtcNow.ToString('o')
     summary       = $summary
     findings      = $orderedFindings

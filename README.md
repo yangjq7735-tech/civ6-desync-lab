@@ -30,6 +30,7 @@ The first phase is deliberately conservative: establish a clean vanilla baseline
 - `HANDOFF.md` — concise engineering state for future Codex/ChatGPT work.
 - `docs/WORKER-PC-BOOTSTRAP.md` — the repeatable PC B/PC C worker setup and readiness procedure.
 - `docs/STATIC-ANALYSIS.md` — Civ VI's reconstructed resync path and the Quick Deals multiplayer state-divergence finding.
+- `docs/MOD-AUDIT-2026-08-21.md` — static audit of the expanded Workshop set, including Multiplayer Helper and Tech Civic Progress Plus.
 
 The diagnostic and comparison scripts do not edit Civ VI, enable FireTuner, inject code, or delete anything. The explicitly named worker bootstrap scripts install their documented prerequisites and configure SSH when the operator runs them.
 

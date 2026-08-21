@@ -125,6 +125,33 @@ player:SetProperty("LOCAL_UI_CACHE", {})
     if ($auditResult.findings[0].modName -ne 'Synthetic Risk') {
         throw 'Synthetic mod audit did not preserve the manifest mod name.'
     }
+
+    $bridgeModRoot = Join-Path $testRoot 'fake-workshop\67890'
+    New-Item -ItemType Directory -Path (Join-Path $bridgeModRoot 'gameplay') -Force | Out-Null
+    @'
+<Mod id="synthetic-bridge-risk" version="1">
+  <Properties><Name>Synthetic UI Bridge Risk</Name></Properties>
+  <InGameActions>
+    <AddGameplayScripts id="risk"><File>gameplay/risk.lua</File></AddGameplayScripts>
+  </InGameActions>
+</Mod>
+'@ | Set-Content -LiteralPath (Join-Path $bridgeModRoot 'SyntheticBridge.modinfo') -Encoding UTF8
+    @'
+function OnLocalUiEvent(playerID)
+    UnitManager.ChangeMovesRemaining(Players[playerID]:GetUnits():FindID(1), -99)
+end
+LuaEvents.LocalUiEvent.Add(OnLocalUiEvent)
+'@ | Set-Content -LiteralPath (Join-Path $bridgeModRoot 'gameplay\risk.lua') -Encoding UTF8
+
+    & $auditScript -WorkshopRoot (Split-Path -Parent $fakeWorkshopRoot) -ReportPath $auditReport | Out-Null
+    $auditResult = Get-Content -LiteralPath $auditReport -Raw | ConvertFrom-Json
+    if ($auditResult.summary.critical -ne 2) {
+        throw "Expected two critical synthetic mod findings; found $($auditResult.summary.critical)."
+    }
+    $bridgeFinding = @($auditResult.findings | Where-Object { $_.modName -eq 'Synthetic UI Bridge Risk' })
+    if ($bridgeFinding.Count -ne 1 -or -not $bridgeFinding[0].uiEventBridge) {
+        throw 'Synthetic mod audit did not detect the UI-to-gameplay mutation bridge.'
+    }
     Write-Host 'PASS: static mod synchronization-risk audit.'
 
     $probeSource = Join-Path $toolsRoot '..\mod\QuickDealsDesyncProbe'

@@ -10,7 +10,7 @@ Static-analysis lead found; next phase is a clean Quick Deals A/B validation usi
 
 ## Working hypothesis
 
-Quick Deals is the leading hypothesis. Its UI calls an `AddGameplayScripts` cache bridge on every game-view load. That bridge chooses `Players[Game.GetLocalPlayer()]` and writes local deal-cache tables through `Player:SetProperty`, so different clients can mutate different serialized simulation objects. Civ VI's native diagnostic strings show that mismatched AutoArchive hashes trigger delta/full snapshots and the visible resync load.
+The installed mod set now contains three independent, code-confirmed unsafe mutation paths: Quick Deals, Multiplayer Helper 1.6.7, and Tech Civic Progress Plus. Each lets client-local UI/player identity control direct GameCore mutation. Civ VI's native diagnostic strings show that resulting AutoArchive hash mismatches trigger delta/full snapshots and the visible resync load.
 
 ## What exists
 
@@ -20,7 +20,7 @@ Quick Deals is the leading hypothesis. Its UI calls an `AddGameplayScripts` cach
 - Marker-aware comparison support for future `CIV6_SYNC_PROBE` instrumentation.
 - A static mod synchronization-risk scanner (`tools/Find-Civ6ModSyncRisks.ps1`).
 - A code-level report (`docs/STATIC-ANALYSIS.md`) documenting Civ VI's resync pipeline and the Quick Deals defect.
-- A scan of all 20 currently installed Workshop manifests: Quick Deals is the sole critical finding; Detailed Wonder Reminder is the sole lower-priority review item.
+- Expanded 25-manifest scan documented in `docs/MOD-AUDIT-2026-08-21.md`: three critical findings (Quick Deals, Multiplayer Helper 1.6.7, Tech Civic Progress Plus). The strengthened scanner detects both local-identity mutations and UI-event-to-gameplay mutation bridges.
 - Controlled validation mod `mod/QuickDealsDesyncProbe`, which calls Quick Deals' exact cache bridge with a client-specific marker after multiplayer game-view load.
 - An installer and evidence contract for experiment `QDP001`; all static and synthetic kit tests pass.
 
